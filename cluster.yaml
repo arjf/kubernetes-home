@@ -1,0 +1,49 @@
+---
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: kubed
+
+servers: 1
+agents: 2
+image: docker.io/rancher/k3s:v1.30.6-k3s1
+
+options:
+  k3d: 
+    wait: true
+    timeout: "60s"
+    disableLoadbalancer: false 
+    disableImageVolume: false 
+    disableRollback: false
+    loadbalancer:
+      configOverrides:
+        - settings.workerConnections=2048
+
+  k3s:
+    extraArgs:
+      - arg: "--tls-san=k3s.arjf.dev,192.168.1.1"
+        nodeFilters:
+          - server:0
+      # - arg: "--tls-san=192.168.1.1@server:0"
+      #   nodeFilters:
+      #     - server:0
+    # nodeLabels:
+    #   - label: foo=bar
+    #     nodeFilters:
+    #       - agent:1
+
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
+
+  runtime:
+    # gpuRequest: all
+    ulimits:
+    - name: nofile
+      soft: 26677
+      hard: 26677
+
+kubeAPI:
+  host: "k3s.arjf.dev" 
+  hostIP: "192.168.1.1" 
+  hostPort: "6550"
